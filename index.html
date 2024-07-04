@@ -22,7 +22,7 @@
 
     <!-- Textbox unten angepinnt -->
     <div class="fixed-bottom">
-        <span class="ip-address" id="user_ip"></span>
+        <span class="username" id="user_ip"></span>
         <input type="text" id="user_input" placeholder="Geben Sie hier etwas ein..." onkeypress="handleKeyPress(event)">
     </div>
 
@@ -41,8 +41,8 @@
             var userInput = document.getElementById("user_input").value;
             var displayArea = document.getElementById("display_area");
             var newParagraph = document.createElement("p"); // Neues p-Element erstellen
-            var userIp = document.getElementById("user_ip").innerText;
-            newParagraph.textContent = userIp + ": " + userInput; // Text des p-Elements setzen
+            var username = document.getElementById("user_ip").innerText;
+            newParagraph.textContent = username + ": " + userInput; // Text des p-Elements setzen
             displayArea.appendChild(newParagraph); // p-Element dem display_area hinzufügen
             document.getElementById("user_input").value = ""; // Eingabefeld leeren
 
@@ -50,21 +50,8 @@
             displayArea.scrollTop = displayArea.scrollHeight;
         }
 
-        // Funktion, um die IP-Adresse des Benutzers zu erhalten
-        function getIpAddress() {
-            fetch("https://api.ipify.org?format=json")
-            .then(response => response.json())
-            .then(data => {
-                let username = getCookie('username');
-                if (username) {
-                    document.getElementById("user_ip").innerText = username;
-                } else {
-                    document.getElementById("user_ip").innerText = data.ip;
-                }
-            })
-            .catch(error => {
-                console.error("Fehler beim Abrufen der IP-Adresse:", error);
-            });
+        function generateRandomNumber() {
+            return Math.floor(Math.random() * 1000000) + 1;
         }
 
         function getRandomName(event) {
@@ -74,8 +61,13 @@
                     document.getElementById("user_ip").innerText = user2;
                     setCookie('username', user2, 7);
                     document.getElementById("user2").value = ""; // Eingabefeld leeren
-                    changeName();
+                } else {
+                    // Generiere einen neuen Benutzernamen
+                    let newUsername = "User" + generateRandomNumber();
+                    document.getElementById("user_ip").innerText = newUsername;
+                    setCookie('username', newUsername, 7);
                 }
+                changeName();
                 event.preventDefault(); // Verhindert, dass das Formular abgesendet wird
             }
         }
@@ -85,8 +77,7 @@
             if (user2Input.style.visibility == "hidden") {
                 user2Input.style.visibility = "visible";
                 user2Input.focus();
-            }
-            else {
+            } else {
                 user2Input.style.visibility = "hidden";
             }
         }
@@ -124,7 +115,15 @@
         }
 
         window.onload = function() {
-            getIpAddress();
+            let username = getCookie('username');
+            if (username) {
+                document.getElementById("user_ip").innerText = username;
+            } else {
+                // Setze einen Standardbenutzernamen, wenn keiner in den Cookies gefunden wird
+                let defaultUsername = "User" + generateRandomNumber();
+                document.getElementById("user_ip").innerText = defaultUsername;
+                setCookie('username', defaultUsername, 7);
+            }
         }
     </script>
 </body>
