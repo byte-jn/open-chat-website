@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Chat</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <header>
+        <h1>Open Chat</h1>
+        <nav>
+            <a href="index.html">Startseite</a>
+            <a href="https://www.google.de/search?q=Bambus">Über uns</a>
+            <a href="mailto:lauer2803@gmail.com?subject=">Kontakt</a>
+            <a href="#" onclick="showNameInput()">Name ändern</a>
+            <input type="text" id="user2" placeholder="Geben Sie hier ihren Namen ein" onkeypress="getRandomName(event)" style="visibility: hidden;">
+        </nav>
+    </header>
+    
+    <section id="display_area"></section>
+
+    <!-- Textbox unten angepinnt -->
+    <div class="fixed-bottom">
+        <span class="ip-address" id="user_ip"></span>
+        <input type="text" id="user_input" placeholder="Geben Sie hier etwas ein..." onkeypress="handleKeyPress(event)">
+    </div>
+
+    <script>
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                var userInput = document.getElementById("user_input").value;
+                if (userInput.trim() !== "") { // Überprüfen, ob das Eingabefeld nicht leer ist
+                    displayInput();
+                }
+                event.preventDefault(); // Verhindert, dass das Formular abgesendet wird
+            }
+        }
+
+        function displayInput() {
+            var userInput = document.getElementById("user_input").value;
+            var displayArea = document.getElementById("display_area");
+            var newParagraph = document.createElement("p"); // Neues p-Element erstellen
+            var userIp = document.getElementById("user_ip").innerText;
+            newParagraph.textContent = userIp + ": " + userInput; // Text des p-Elements setzen
+            displayArea.appendChild(newParagraph); // p-Element dem display_area hinzufügen
+            document.getElementById("user_input").value = ""; // Eingabefeld leeren
+
+            // Automatisch nach unten scrollen
+            displayArea.scrollTop = displayArea.scrollHeight;
+        }
+
+        // Funktion, um die IP-Adresse des Benutzers zu erhalten
+        function getIpAddress() {
+            fetch("https://api.ipify.org?format=json")
+            .then(response => response.json())
+            .then(data => {
+                let username = getCookie('username');
+                if (username) {
+                    document.getElementById("user_ip").innerText = username;
+                } else {
+                    document.getElementById("user_ip").innerText = data.ip;
+                }
+            })
+            .catch(error => {
+                console.error("Fehler beim Abrufen der IP-Adresse:", error);
+            });
+        }
+
+        function getRandomName(event) {
+            if (event.key === 'Enter') {
+                var user2 = document.getElementById("user2").value;
+                if (user2.trim() !== "") { // Überprüfen, ob das Eingabefeld nicht leer ist
+                    document.getElementById("user_ip").innerText = user2;
+                    setCookie('username', user2, 7);
+                    document.getElementById("user2").value = ""; // Eingabefeld leeren
+                    changeName();
+                }
+                event.preventDefault(); // Verhindert, dass das Formular abgesendet wird
+            }
+        }
+
+        function changeName() {
+            var user2Input = document.getElementById("user2");
+            if (user2Input.style.visibility == "hidden") {
+                user2Input.style.visibility = "visible";
+                user2Input.focus();
+            }
+            else {
+                user2Input.style.visibility = "hidden";
+            }
+        }
+
+        function showNameInput() {
+            var user2Input = document.getElementById("user2");
+            user2Input.style.visibility = "visible";
+            user2Input.focus();
+        }
+
+        // Cookie-Funktionen
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function eraseCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999;';
+        }
+
+        window.onload = function() {
+            getIpAddress();
+        }
+    </script>
+</body>
+</html>
